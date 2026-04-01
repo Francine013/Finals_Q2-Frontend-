@@ -20,7 +20,8 @@ export const TodoPage = () => {
           🔍 Verify Chain
         </button>
         <span className={`chain-status ${chainStatus.valid ? "valid" : "invalid"}`}>
-          {chainStatus.valid ? "✅ Chain Valid" : "❌ Chain Tampered"}
+          {chainStatus.valid ? "✅ " : "❌ "}
+          {chainStatus.message}
         </span>
       </div>
     </main>

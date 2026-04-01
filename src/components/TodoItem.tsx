@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import type { Todo } from "../types/Todo";
+import { useNavigate } from "react-router-dom";
 import { useTodos } from "../hooks/useTodos";
 import { EditTodoModal } from "./EditTodoModal";
 
@@ -8,6 +9,7 @@ interface TodoItemProps {
 }
 
 export const TodoItem = ({ todo }: TodoItemProps) => {
+  const navigate = useNavigate();
   const { updateTodo, deleteTodo, canComplete, ghostingTodos } = useTodos();
   const [isEditing, setIsEditing] = useState(false);
   const [countdown, setCountdown] = useState(15);
@@ -27,11 +29,13 @@ export const TodoItem = ({ todo }: TodoItemProps) => {
 
   const handleToggle = async () => {
     if (!todo.completed && !isCompletable) return; // FIFO enforcement
-    await updateTodo(todo.id, { completed: !todo.completed });
+    const success = await updateTodo(todo.id, { completed: !todo.completed });
+    if (success) navigate("/"); // Programmatic Navigation Requirement
   };
 
   const handleDelete = async () => {
-    await deleteTodo(todo.id);
+    const success = await deleteTodo(todo.id);
+    if (success) navigate("/"); // Programmatic Navigation Requirement
   };
 
   const handleEdit = async (newTitle: string) => {

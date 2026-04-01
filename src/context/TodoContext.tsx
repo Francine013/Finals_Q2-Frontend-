@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useCallback, ReactNode } from "react";
+import { createContext, useState, useEffect, useCallback, type ReactNode } from "react";
 import type { Todo, ChainStatus } from "../types/Todo";
 
 const API_URL = "http://localhost:5000/api/todos";
@@ -68,8 +68,8 @@ export const TodoProvider = ({ children }: { children: ReactNode }) => {
         setError(err.error || "Failed to add todo");
         return false;
       }
-    } catch {
-      setError("Network error");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Network error - check if API is running");
       return false;
     }
   };
@@ -93,8 +93,8 @@ export const TodoProvider = ({ children }: { children: ReactNode }) => {
         return true;
       }
       return false;
-    } catch {
-      setError("Network error");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Network error - check if API is running");
       return false;
     }
   };
@@ -110,8 +110,8 @@ export const TodoProvider = ({ children }: { children: ReactNode }) => {
         return true;
       }
       return false;
-    } catch {
-      setError("Network error");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Network error - check if API is running");
       return false;
     }
   };
@@ -125,8 +125,11 @@ export const TodoProvider = ({ children }: { children: ReactNode }) => {
       } else {
         setChainStatus({ valid: false, message: data.message || "Chain Tampered" });
       }
-    } catch {
-      setChainStatus({ valid: false, message: "Verification failed — server unreachable" });
+    } catch (err) {
+      setChainStatus({ 
+        valid: false, 
+        message: err instanceof Error ? err.message : "Verification failed — server unreachable" 
+      });
     }
   };
 

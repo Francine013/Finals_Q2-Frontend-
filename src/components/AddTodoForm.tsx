@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm, type SubmitHandler } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import { useTodos } from "../hooks/useTodos";
 
 type FormValues = { title: string };
@@ -21,6 +22,7 @@ async function mineNonce(title: string, onProgress: (nonce: number) => void): Pr
 }
 
 export const AddTodoForm = () => {
+  const navigate = useNavigate();
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormValues>();
   const { addTodo, canAddTodo, activeTodoCount } = useTodos();
   const [isMining, setIsMining] = useState(false);
@@ -32,7 +34,10 @@ export const AddTodoForm = () => {
     try {
       const nonce = await mineNonce(data.title, setMiningNonce);
       const success = await addTodo(data.title, nonce);
-      if (success) reset();
+      if (success) {
+        reset();
+        navigate("/"); // Programmatic Navigation Requirement
+      }
     } finally {
       setIsMining(false);
       setMiningNonce(null);
