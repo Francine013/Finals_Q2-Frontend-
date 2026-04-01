@@ -10,8 +10,20 @@ interface TodoItemProps {
 export const TodoItem = ({ todo }: TodoItemProps) => {
   const { updateTodo, deleteTodo, canComplete, ghostingTodos } = useTodos();
   const [isEditing, setIsEditing] = useState(false);
+  const [countdown, setCountdown] = useState(15);
+  
   const isGhosting = ghostingTodos.has(todo.id);
   const isCompletable = canComplete(todo.id);
+
+  // Countdown timer for ghosting items
+  React.useEffect(() => {
+    if (isGhosting) {
+      const timer = setInterval(() => {
+        setCountdown(prev => Math.max(0, prev - 1));
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [isGhosting]);
 
   const handleToggle = async () => {
     if (!todo.completed && !isCompletable) return; // FIFO enforcement
@@ -49,7 +61,7 @@ export const TodoItem = ({ todo }: TodoItemProps) => {
         </div>
         <div className="todo-actions">
           {isGhosting && (
-            <span className="ghost-badge">👻 Vanishing...</span>
+            <span className="ghost-badge">👻 {countdown}s</span>
           )}
           {!todo.completed && isCompletable && (
             <span className="fifo-badge">▶ Next</span>

@@ -17,13 +17,15 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     localStorage.setItem("todo-theme", theme);
+    
+    // Apply theme class to body for consistent background colors
+    const body = document.body;
+    body.className = `theme-${theme}`;
   }, [theme]);
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>
-      <div className={`theme-${theme}`}>
-        {children}
-      </div>
+      {children}
     </ThemeContext.Provider>
   );
 };

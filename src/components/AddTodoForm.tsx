@@ -5,9 +5,10 @@ import { useTodos } from "../hooks/useTodos";
 type FormValues = { title: string };
 
 // Simple Proof of Work: find nonce where SHA-256(title+nonce) starts with "00"
-async function mineNonce(title: string): Promise<number> {
+async function mineNonce(title: string, onProgress: (nonce: number) => void): Promise<number> {
   let nonce = 0;
   while (true) {
+    if (nonce % 100 === 0) onProgress(nonce); // Update UI every 100 iterations
     const data = title + nonce;
     const msgBuffer = new TextEncoder().encode(data);
     const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
@@ -23,16 +24,18 @@ export const AddTodoForm = () => {
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormValues>();
   const { addTodo, canAddTodo, activeTodoCount } = useTodos();
   const [isMining, setIsMining] = useState(false);
+  const [miningNonce, setMiningNonce] = useState<number | null>(null);
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     if (!canAddTodo) return;
     setIsMining(true);
     try {
-      const nonce = await mineNonce(data.title);
+      const nonce = await mineNonce(data.title, setMiningNonce);
       const success = await addTodo(data.title, nonce);
       if (success) reset();
     } finally {
       setIsMining(false);
+      setMiningNonce(null);
     }
   };
 
@@ -47,13 +50,19 @@ export const AddTodoForm = () => {
             className="todo-input"
           />
           {errors.title && <span className="form-error">{errors.title.message}</span>}
+          {isMining && (
+            <div className="mining-status">
+              <span className="mining-spinner">⛏️</span> 
+              <span>Mining Hash... Nonce: {miningNonce}</span>
+            </div>
+          )}
         </div>
         <button
           type="submit"
           disabled={!canAddTodo || isMining}
           className="btn btn-primary"
         >
-          {isMining ? "⛏️ Mining..." : "Add Task"}
+          {isMining ? "Mining..." : "Add Task"}
         </button>
       </form>
       <div className="capacity-bar">
